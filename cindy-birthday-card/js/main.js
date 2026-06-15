@@ -1,7 +1,7 @@
-import { content } from '../content.js?v=mqenrgpp';
-import { initCarousel } from './carousel.js?v=mqenrgpp';
-import { createGame } from './game.js?v=mqenrgpp';
-import { start as startAudio, toggleMute } from './audio.js?v=mqenrgpp';
+import { content } from '../content.js?v=mqeo4y7g';
+import { initCarousel } from './carousel.js?v=mqeo4y7g';
+import { createGame } from './game.js?v=mqeo4y7g';
+import { start as startAudio, stopMusic, toggleMute } from './audio.js?v=mqeo4y7g';
 
 function paragraphs(el, text) {
   el.innerHTML = '';
@@ -28,8 +28,8 @@ const progressFill = document.getElementById('progress-fill');
 const game = createGame(canvas, {
   onScore: (s) => { hudScore.textContent = `🎁 ${s}`; },
   onProgress: (p) => { progressFill.style.width = `${Math.round(p * 100)}%`; },
-  onWin: (s) => revealPayoff(s),
-  onLose: () => { gameoverOverlay.hidden = false; },
+  onWin: (s) => { stopMusic(); revealPayoff(s); },
+  onLose: () => { stopMusic(); gameoverOverlay.hidden = false; },
 });
 game.boot();
 
@@ -41,6 +41,7 @@ document.getElementById('play-btn').addEventListener('click', () => {
 
 document.getElementById('retry-btn').addEventListener('click', () => {
   gameoverOverlay.hidden = true;
+  startAudio();   // restart the chiptune for the new run
   game.reset();
 });
 
@@ -66,6 +67,7 @@ function revealPayoff(score) {
   again.className = 'play-btn payoff-again';
   again.textContent = '▶ Play the game again';
   again.addEventListener('click', () => {
+    startAudio();   // restart the chiptune for the new run
     game.reset();
     document.querySelector('.game-section').scrollIntoView({ behavior: 'smooth' });
   });

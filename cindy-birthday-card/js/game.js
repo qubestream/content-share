@@ -1,7 +1,7 @@
-import { LEVEL } from './level.js?v=mqf4hrgp';
-import { rectsOverlap, tryJump, stepRunner } from './physics.js?v=mqf4hrgp';
-import { drawBackground, drawCindy, drawItem, CINDY_W, CINDY_H, ITEM_SIZE } from './sprites.js?v=mqf4hrgp';
-import { blip, thud, win as winSound, boom as boomSound } from './audio.js?v=mqf4hrgp';
+import { LEVEL } from './level.js?v=mqf4v9es';
+import { rectsOverlap, tryJump, stepRunner } from './physics.js?v=mqf4v9es';
+import { drawBackground, drawCindy, drawItem, CINDY_W, CINDY_H, ITEM_SIZE } from './sprites.js?v=mqf4v9es';
+import { blip, win as winSound, boom as boomSound } from './audio.js?v=mqf4v9es';
 
 const VIEW_W = 800;
 const VIEW_H = 300;
@@ -15,14 +15,12 @@ const CINDY_X = 90;
 // Forgiving hitbox inset so near-misses survive.
 const HIT_INSET_X = 10;
 const HIT_INSET_TOP = 8;
-const ROCK_TOP = VIEW_H - 28 - ITEM_SIZE; // screen-y of the top of a ground rock
-const STOMP_BOUNCE_V = -11;   // little hop after stomping a rock
-const STOMP_POINTS = 2;       // reward for stomping a rock
-const COLLECT_POINTS = 1;     // present / balloon
+const COLLECT_POINTS = 1;     // present / balloon -> +points
+const ROCK_PENALTY = 1;       // rock -> explodes & costs points (no game over; score can go negative)
 const STEP_MS = 1000 / 60;    // fixed simulation step (game speed is frame-rate independent)
 const MAX_STEPS = 5;          // cap catch-up steps per frame (avoids spiral on slow devices)
 
-export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) {
+export function createGame(canvas, { onScore, onProgress, onWin } = {}) {
   const ctx = canvas.getContext('2d');
   const dpr = Math.min(window.devicePixelRatio || 1, 2); // cap backing store (cheaper on hi-DPR phones)
   canvas.width = VIEW_W * dpr;
@@ -30,7 +28,7 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.imageSmoothingEnabled = false;
 
-  // phase: 'idle' | 'running' | 'flinging' | 'won' | 'dead'
+  // phase: 'idle' | 'running' | 'won'  (there is no losing — she always reaches the party)
   let phase = 'idle';
   let scrollX = 0;
   let score = 0;
@@ -40,7 +38,6 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
   let lastNow = null;          // timestamp of previous frame (for fixed-timestep)
   let acc = 0;                 // accumulated real time not yet simulated
   let cindy = { y: GROUND_Y, vy: 0, onGround: true };
-  let fling = null;            // {x, y, vx, vy, rot} while being thrown out
   let blast = null;            // {parts, age} rock-explosion particles
   const consumed = new Set();
 
@@ -53,12 +50,6 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
     const screenX = e.x - scrollX + CINDY_X;
     const y = e.type === 'trash' ? VIEW_H - 28 - ITEM_SIZE : ITEM_FLOAT_Y;
     return { x: screenX, y, w: ITEM_SIZE, h: ITEM_SIZE };
-  }
-
-  function startFling() {
-    phase = 'flinging';
-    // Launch her up and forward, spinning, so she sails out of the window.
-    fling = { x: CINDY_X, y: cindy.y, vx: 9, vy: -22, rot: 0 };
   }
 
   function spawnBlast(cx, cy) {
@@ -81,23 +72,9 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
 
   function update() {
     stepBlast();
-    if (phase === 'flinging') {
-      fling.vy += GRAVITY * 0.6;
-      fling.x += fling.vx;
-      fling.y += fling.vy;
-      fling.rot += 0.32;
-      // Off any edge of the window -> game over.
-      if (fling.y > VIEW_H + 120 || fling.y < -240 || fling.x > VIEW_W + 120 || fling.x < -160) {
-        phase = 'dead';
-        onLose && onLose(score);
-      }
-      return;
-    }
-
     if (phase !== 'running') return;
 
     scrollX += RUN_SPEED;
-    const feetBefore = cindy.y + CINDY_H;                 // feet position before this step
     cindy = stepRunner(cindy, { gravity: GRAVITY, groundY: GROUND_Y });
 
     if (cindy.onGround && ++runPhaseTimer > 5) { runPhase ^= 1; runPhaseTimer = 0; }
@@ -114,25 +91,15 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
       const r = entityRect(e);
       if (r.x > VIEW_W + 50 || r.x < -50) continue;
       if (rectsOverlap(cindyRect, r)) {
-        if (e.type === 'trash') {
-          // Landing ON the rock (descending, feet were at/above its top) = stomp.
-          const stomp = cindy.vy > 0 && feetBefore <= ROCK_TOP + 6;
-          if (stomp) {
-            consumed.add(i);                               // rock explodes & vanishes
-            spawnBlast(r.x + ITEM_SIZE / 2, r.y + ITEM_SIZE / 2);
-            boomSound();
-            score += STOMP_POINTS;
-            onScore && onScore(score);
-            cindy = { ...cindy, vy: STOMP_BOUNCE_V, onGround: false }; // bounce, keep running
-            continue;
-          }
-          thud();
-          startFling();          // ran into its side -> flung off, rock untouched
-          return;
-        }
         consumed.add(i);
-        score += COLLECT_POINTS;
-        blip();
+        if (e.type === 'trash') {
+          spawnBlast(r.x + ITEM_SIZE / 2, r.y + ITEM_SIZE / 2);
+          boomSound();
+          score -= ROCK_PENALTY;     // rock explodes & costs points, but she keeps running
+        } else {
+          score += COLLECT_POINTS;   // present / balloon
+          blip();
+        }
         onScore && onScore(score);
       }
     }
@@ -140,7 +107,7 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
     onProgress && onProgress(Math.min(1, scrollX / LEVEL.finishX));
 
     if (scrollX >= LEVEL.finishX) {
-      phase = 'won';
+      phase = 'won';               // always reaches the party — she wins no matter the score
       winSound();
       onWin && onWin(score);
     }
@@ -156,16 +123,7 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
       if (r.x > VIEW_W + 50 || r.x < -50) continue;
       drawItem(ctx, e.type === 'trash' ? e.kind : e.type, r.x, r.y);
     }
-    if (phase === 'flinging') {
-      ctx.save();
-      ctx.translate(fling.x + CINDY_W / 2, fling.y + CINDY_H / 2);
-      ctx.rotate(fling.rot);
-      drawCindy(ctx, -CINDY_W / 2, -CINDY_H / 2, { jumping: true, runPhase: 0 });
-      ctx.restore();
-    } else if (phase !== 'dead') {
-      drawCindy(ctx, CINDY_X, cindy.y, { jumping: !cindy.onGround, runPhase });
-    }
-    // phase === 'dead': Cindy is gone (flung out of the window).
+    drawCindy(ctx, CINDY_X, cindy.y, { jumping: !cindy.onGround, runPhase });
     if (blast) {
       for (const p of blast.parts) {
         if (p.life <= 0) continue;
@@ -190,7 +148,7 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
     let steps = 0;
     while (acc >= STEP_MS && steps < MAX_STEPS) { update(); acc -= STEP_MS; steps++; }
     render();
-    if (phase !== 'won' && phase !== 'dead') raf = requestAnimationFrame(frame);
+    if (phase !== 'won') raf = requestAnimationFrame(frame);
     else raf = null;
   }
 
@@ -200,7 +158,6 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
     score = 0;
     runPhase = 0;
     runPhaseTimer = 0;
-    fling = null;
     blast = null;
     lastNow = null;            // re-sync the clock so the gap while stopped isn't simulated
     acc = 0;

@@ -1,7 +1,7 @@
-import { content } from '../content.js?v=mqeogo0y';
-import { initCarousel } from './carousel.js?v=mqeogo0y';
-import { createGame } from './game.js?v=mqeogo0y';
-import { start as startAudio, stopMusic, toggleMute } from './audio.js?v=mqeogo0y';
+import { content } from '../content.js?v=mqeoqka4';
+import { initCarousel } from './carousel.js?v=mqeoqka4';
+import { createGame } from './game.js?v=mqeoqka4';
+import { start as startAudio, stopMusic, toggleMute } from './audio.js?v=mqeoqka4';
 
 function paragraphs(el, text) {
   el.innerHTML = '';
@@ -25,23 +25,35 @@ const gameoverOverlay = document.getElementById('gameover-overlay');
 const hudScore = document.getElementById('hud-score');
 const progressFill = document.getElementById('progress-fill');
 
+// Lock page scrolling while the game is actively being played, so a tap-to-jump
+// (which often includes a tiny drag on a phone) can't scroll the page. Released
+// when the game ends, so the hidden message + footer become reachable.
+function preventScroll(e) { e.preventDefault(); }
+function setPlaying(on) {
+  document.body.classList.toggle('playing', on);
+  if (on) document.addEventListener('touchmove', preventScroll, { passive: false });
+  else document.removeEventListener('touchmove', preventScroll, { passive: false });
+}
+
 const game = createGame(canvas, {
   onScore: (s) => { hudScore.textContent = `🎁 ${s}`; },
   onProgress: (p) => { progressFill.style.width = `${Math.round(p * 100)}%`; },
-  onWin: (s) => { stopMusic(); revealPayoff(s); },
-  onLose: () => { stopMusic(); gameoverOverlay.hidden = false; },
+  onWin: (s) => { setPlaying(false); stopMusic(); revealPayoff(s); },
+  onLose: () => { setPlaying(false); stopMusic(); gameoverOverlay.hidden = false; },
 });
 game.boot();
 
 document.getElementById('play-btn').addEventListener('click', () => {
   startAudio();
   overlay.hidden = true;
+  setPlaying(true);
   game.start();
 });
 
 document.getElementById('retry-btn').addEventListener('click', () => {
   gameoverOverlay.hidden = true;
   startAudio();   // restart the chiptune for the new run
+  setPlaying(true);
   game.reset();
 });
 
@@ -68,6 +80,7 @@ function revealPayoff(score) {
   again.textContent = '▶ Play the game again';
   again.addEventListener('click', () => {
     startAudio();   // restart the chiptune for the new run
+    setPlaying(true);
     game.reset();
     document.querySelector('.game-section').scrollIntoView({ behavior: 'smooth' });
   });

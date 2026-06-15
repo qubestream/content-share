@@ -85,12 +85,14 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
 .carousel-dot.active { background: var(--pink); }
 .carousel-empty { text-align: center; color: var(--green); }
 
+body.playing { overflow: hidden; }   /* lock scrolling while the game is being played */
+
 .game-section { margin: 24px 0 40px; }
 .game-prompt { text-align: center; color: var(--green); margin: 4px 0 12px; }
 .game-wrap { position: relative; max-width: 800px; margin: 0 auto; }
 #game-canvas {
   width: 100%; height: auto; display: block; border-radius: 14px;
-  box-shadow: var(--shadow); image-rendering: pixelated; background: #ffd9a8; touch-action: manipulation;
+  box-shadow: var(--shadow); image-rendering: pixelated; background: #ffd9a8; touch-action: none;
 }
 .game-overlay {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -129,5 +131,11 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
 .page-footer { text-align: center; color: var(--green); padding: 24px; }
 
 @media (max-width: 480px) {
-  .carousel-arrow { width: 34px; height: 34px; }
+  /* Arrows below the photo (not overlaying it): row of  ‹  • • •  › */
+  .carousel { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px; }
+  .carousel-viewport { order: 1; flex: 0 0 100%; }
+  .carousel-arrow { position: static; transform: none; width: 44px; height: 44px; }
+  .carousel-arrow.prev { order: 2; left: auto; }
+  .carousel-dots { order: 3; margin-top: 0; }
+  .carousel-arrow.next { order: 4; right: auto; }
 }

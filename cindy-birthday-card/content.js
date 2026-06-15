@@ -5,18 +5,19 @@ export const content = {
   // Shown in the heartfelt section (top of page). Plain text; \n starts a new paragraph.
   heartfelt:
     "Happy birthday, Cindy! 🎂\n" +
-    "You are the rock this whole family is built on — the one who holds us all together " +
-    "and makes it look effortless. You've loved your kids and grandkids with your whole heart, " +
-    "and you've always taken such good care of me, too. Today, it's our turn to celebrate you.\n" +
+    "You've been a rock for this whole family — steady, warm, and always there when it counts. " +
+    "You took on me and the never boring crew you married into 😄 and loved us like your own, grandkids and all. " +
+    "Thank you for taking such good care of all of us. Today, it's our turn to celebrate you.\n" +
     "Love, Glen",
 
   // Revealed ONLY after the game is won (the surprise climax).
   finalHidden:
     "You made it to the party — of course you did. 🎉\n" +
-    "You've spent a lifetime taking care of all of us: your kids, your grandkids, and me. " +
-    "You're the heart and the rock of this family, and the best grandma those kids could ever ask for. " +
+    "You didn't have to take all of us on — me, the never boring crew, and our kids too — " +
+    "but you did, and you've loved us with your whole heart ever since. " +
+    "You've been a rock for this family and the kind of grandma these kids are lucky to have. " +
     "Today, let us take care of you.\n" +
-    "Happy birthday, Cindy. We love you with everything. ❤️\n" +
+    "Happy birthday, Cindy. We love you. ❤️\n" +
     "Love, Glen",
 
   // Short call-to-action shown above the game.

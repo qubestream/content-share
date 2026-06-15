@@ -1,7 +1,7 @@
 import { LEVEL } from './level.js';
 import { rectsOverlap, tryJump, stepRunner } from './physics.js';
 import { drawBackground, drawCindy, drawItem, CINDY_W, CINDY_H, ITEM_SIZE } from './sprites.js';
-import { blip, win as winSound, boom as boomSound } from './audio.js';
+import { blip, thud, win as winSound, boom as boomSound } from './audio.js';
 
 const VIEW_W = 800;
 const VIEW_H = 300;
@@ -12,9 +12,13 @@ const JUMP_V = -16;
 const ITEM_FLOAT_Y = GROUND_Y - 40;
 const CINDY_X = 90;
 
-// Forgiving hitbox inset so near-misses survive (trash now ends the run).
+// Forgiving hitbox inset so near-misses survive.
 const HIT_INSET_X = 10;
 const HIT_INSET_TOP = 8;
+const ROCK_TOP = VIEW_H - 28 - ITEM_SIZE; // screen-y of the top of a ground rock
+const STOMP_BOUNCE_V = -11;   // little hop after stomping a rock
+const STOMP_POINTS = 2;       // reward for stomping a rock
+const COLLECT_POINTS = 1;     // present / balloon
 
 export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) {
   const ctx = canvas.getContext('2d');
@@ -89,6 +93,7 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
     if (phase !== 'running') return;
 
     scrollX += RUN_SPEED;
+    const feetBefore = cindy.y + CINDY_H;                 // feet position before this step
     cindy = stepRunner(cindy, { gravity: GRAVITY, groundY: GROUND_Y });
 
     if (cindy.onGround && ++runPhaseTimer > 5) { runPhase ^= 1; runPhaseTimer = 0; }
@@ -106,14 +111,23 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
       if (r.x > VIEW_W + 50 || r.x < -50) continue;
       if (rectsOverlap(cindyRect, r)) {
         if (e.type === 'trash') {
-          consumed.add(i);                                    // the rock blows up & vanishes
-          spawnBlast(r.x + ITEM_SIZE / 2, r.y + ITEM_SIZE / 2);
-          boomSound();
-          startFling();          // hit a rock -> blown up & thrown out of the game
+          // Landing ON the rock (descending, feet were at/above its top) = stomp.
+          const stomp = cindy.vy > 0 && feetBefore <= ROCK_TOP + 6;
+          if (stomp) {
+            consumed.add(i);                               // rock explodes & vanishes
+            spawnBlast(r.x + ITEM_SIZE / 2, r.y + ITEM_SIZE / 2);
+            boomSound();
+            score += STOMP_POINTS;
+            onScore && onScore(score);
+            cindy = { ...cindy, vy: STOMP_BOUNCE_V, onGround: false }; // bounce, keep running
+            continue;
+          }
+          thud();
+          startFling();          // ran into its side -> flung off, rock untouched
           return;
         }
         consumed.add(i);
-        score += 1;
+        score += COLLECT_POINTS;
         blip();
         onScore && onScore(score);
       }

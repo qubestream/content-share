@@ -1,12 +1,12 @@
 import { LEVEL } from './level.js';
 import { rectsOverlap, tryJump, stepRunner } from './physics.js';
 import { drawBackground, drawCindy, drawItem, CINDY_W, CINDY_H, ITEM_SIZE } from './sprites.js';
-import { blip, thud, win as winSound } from './audio.js';
+import { blip, win as winSound, boom as boomSound } from './audio.js';
 
 const VIEW_W = 800;
 const VIEW_H = 300;
 const GROUND_Y = VIEW_H - 28 - CINDY_H;
-const RUN_SPEED = 4.6;        // world px per frame (snappier pace)
+const RUN_SPEED = 3.9;        // world px per frame
 const GRAVITY = 1.1;
 const JUMP_V = -16;
 const ITEM_FLOAT_Y = GROUND_Y - 40;
@@ -33,6 +33,7 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
   let raf = null;
   let cindy = { y: GROUND_Y, vy: 0, onGround: true };
   let fling = null;            // {x, y, vx, vy, rot} while being thrown out
+  let blast = null;            // {parts, age} rock-explosion particles
   const consumed = new Set();
 
   function jump() {
@@ -47,13 +48,31 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
   }
 
   function startFling() {
-    thud();
     phase = 'flinging';
     // Launch her up and forward, spinning, so she sails out of the window.
-    fling = { x: CINDY_X, y: cindy.y, vx: 8, vy: -22, rot: 0 };
+    fling = { x: CINDY_X, y: cindy.y, vx: 9, vy: -22, rot: 0 };
+  }
+
+  function spawnBlast(cx, cy) {
+    const colors = ['#ffd23f', '#ff8c1a', '#d6334a', '#7d848c', '#ffffff'];
+    const parts = [];
+    for (let i = 0; i < 16; i++) {
+      const a = (Math.PI * 2 * i) / 16 + Math.random() * 0.4;
+      const sp = 2 + Math.random() * 4.5;
+      parts.push({ x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.2, life: 1, c: colors[i % colors.length], s: 3 + Math.random() * 4 });
+    }
+    blast = { parts, age: 0 };
+  }
+
+  function stepBlast() {
+    if (!blast) return;
+    blast.age++;
+    for (const p of blast.parts) { p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.life -= 0.045; }
+    if (blast.age > 28) blast = null;
   }
 
   function update() {
+    stepBlast();
     if (phase === 'flinging') {
       fling.vy += GRAVITY * 0.6;
       fling.x += fling.vx;
@@ -87,7 +106,10 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
       if (r.x > VIEW_W + 50 || r.x < -50) continue;
       if (rectsOverlap(cindyRect, r)) {
         if (e.type === 'trash') {
-          startFling();          // hit a rock -> thrown out of the game
+          consumed.add(i);                                    // the rock blows up & vanishes
+          spawnBlast(r.x + ITEM_SIZE / 2, r.y + ITEM_SIZE / 2);
+          boomSound();
+          startFling();          // hit a rock -> blown up & thrown out of the game
           return;
         }
         consumed.add(i);
@@ -126,6 +148,15 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
       drawCindy(ctx, CINDY_X, cindy.y, { jumping: !cindy.onGround, runPhase });
     }
     // phase === 'dead': Cindy is gone (flung out of the window).
+    if (blast) {
+      for (const p of blast.parts) {
+        if (p.life <= 0) continue;
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.c;
+        ctx.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s);
+      }
+      ctx.globalAlpha = 1;
+    }
   }
 
   function frame() {
@@ -142,6 +173,7 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
     runPhase = 0;
     runPhaseTimer = 0;
     fling = null;
+    blast = null;
     cindy = { y: GROUND_Y, vy: 0, onGround: true };
     consumed.clear();
     onScore && onScore(0);

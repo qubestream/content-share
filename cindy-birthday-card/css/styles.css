@@ -69,8 +69,8 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
 .carousel { position: relative; max-width: 640px; margin: 12px auto; }
 .carousel-viewport { overflow: hidden; border-radius: 14px; box-shadow: var(--shadow); }
 .carousel-track { display: flex; transition: transform 0.35s ease; }
-.carousel-slide { flex: 0 0 100%; margin: 0; background: linear-gradient(160deg, #ffe3ec, #fff5f8); }
-.carousel-slide img { width: 100%; height: 360px; object-fit: contain; display: block; }
+.carousel-slide { flex: 0 0 100%; margin: 0; background: #f3dde5; }
+.carousel-slide img { width: 100%; aspect-ratio: 4 / 3; height: auto; object-fit: cover; display: block; }
 .carousel-slide figcaption {
   background: #fff; color: var(--ink); padding: 10px 14px; font-style: italic; text-align: center;
 }
@@ -129,5 +129,4 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
 
 @media (max-width: 480px) {
   .carousel-arrow { width: 34px; height: 34px; }
-  .carousel-slide img { height: 300px; }
 }

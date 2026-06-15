@@ -8,7 +8,7 @@ function buildEntities() {
     entities.push({ type: 'trash', x, kind: TRASH_KINDS[k % TRASH_KINDS.length] });
     entities.push({ type: 'present', x: x + 90 });
     if (k % 2 === 0) entities.push({ type: 'balloon', x: x + 200 });
-    x += 320;
+    x += 440;
     k += 1;
   }
   return entities;

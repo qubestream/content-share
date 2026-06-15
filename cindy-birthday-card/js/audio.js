@@ -62,6 +62,14 @@ export function win() {
   seq.forEach((f, i) => tone(f, ctx.currentTime + i * 0.12, 0.16, 'square', 0.3));
 }
 
+export function boom() {            // rock explosion
+  if (!ctx || muted) return;
+  const t = ctx.currentTime;
+  tone(180, t, 0.28, 'sawtooth', 0.38);
+  tone(90, t, 0.4, 'square', 0.32);
+  tone(320, t + 0.02, 0.14, 'sawtooth', 0.22);
+}
+
 export function toggleMute() {
   muted = !muted;
   if (master) master.gain.value = muted ? 0 : 0.25;

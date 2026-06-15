@@ -92,40 +92,41 @@ const BALLOON = [
   '....P...',
   '...P....',
 ];
-const CAN = [
-  '.gRRRRg.',
-  '.RRRRRR.',
-  '.RRWWRR.',
-  '.RRWWRR.',
-  '.RRRRRR.',
-  '.gRRRRg.',
-  '........',
-  '........',
+// Obstacles: high-contrast gray rocks with dark outlines (easy to see vs the sky).
+const ROCK_A = [
+  '..dddd..',
+  '.dDDDDd.',
+  'dDhhDDDd',
+  'dDDDDDDd',
+  'dDDDDDDd',
+  'dDDDDDDd',
+  '.dDDDDd.',
+  '..dddd..',
 ];
-const BAG = [
-  '..BBBB..',
-  '.BBBBBB.',
-  'BBBBBBBB',
-  'BBBBBBBB',
-  'BBBBBBBB',
-  'BBBBBBBB',
-  '.BBBBBB.',
-  '........',
+const ROCK_B = [
+  '...dd...',
+  '..dDDd..',
+  '.dhDDDd.',
+  'dDDDDDDd',
+  'dDDDDDDd',
+  'dDDDDDDd',
+  'ddDDDDdd',
+  '.dddddd.',
 ];
-const BANANA = [
-  '....YY..',
-  '...YY...',
-  '..YY....',
-  '.YY.....',
-  '.YY.....',
-  '..YYYY..',
-  '....YYY.',
+const ROCK_C = [
+  '........',
+  '.dddddd.',
+  'dDhhDDDd',
+  'dDDDDDDd',
+  'dDDDDDDd',
+  'ddDDDDdd',
+  '.dddddd.',
   '........',
 ];
 
 const ITEM_PALETTE = {
-  '.': null, R: '#d6334a', Y: '#ffd23f', P: '#ff7eb6',
-  g: '#9aa0a6', W: '#e8eaed', B: '#5b4636', C: '#3aa0ff',
+  '.': null, Y: '#ffd23f', P: '#ff7eb6', C: '#3aa0ff',
+  d: '#2e2e33', D: '#7d848c', h: '#c2c7cf',
 };
 
 function drawGrid(ctx, grid, palette, x, y, scale) {
@@ -149,7 +150,7 @@ export function drawCindy(ctx, x, y, { jumping, runPhase }) {
 export const CINDY_W = 12 * SPRITE_SCALE;
 export const CINDY_H = 16 * SPRITE_SCALE;
 
-const ITEM_GRIDS = { present: PRESENT, balloon: BALLOON, can: CAN, bag: BAG, banana: BANANA };
+const ITEM_GRIDS = { present: PRESENT, balloon: BALLOON, can: ROCK_A, bag: ROCK_B, banana: ROCK_C };
 
 export function drawItem(ctx, kind, x, y, scale = SPRITE_SCALE) {
   drawGrid(ctx, ITEM_GRIDS[kind] || PRESENT, ITEM_PALETTE, x, y, scale);

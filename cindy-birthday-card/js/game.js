@@ -1,7 +1,7 @@
-import { LEVEL } from './level.js?v=mqeplciz';
-import { rectsOverlap, tryJump, stepRunner } from './physics.js?v=mqeplciz';
-import { drawBackground, drawCindy, drawItem, CINDY_W, CINDY_H, ITEM_SIZE } from './sprites.js?v=mqeplciz';
-import { blip, thud, win as winSound, boom as boomSound } from './audio.js?v=mqeplciz';
+import { LEVEL } from './level.js?v=mqepniad';
+import { rectsOverlap, tryJump, stepRunner } from './physics.js?v=mqepniad';
+import { drawBackground, drawCindy, drawItem, CINDY_W, CINDY_H, ITEM_SIZE } from './sprites.js?v=mqepniad';
+import { blip, thud, win as winSound, boom as boomSound } from './audio.js?v=mqepniad';
 
 const VIEW_W = 800;
 const VIEW_H = 300;

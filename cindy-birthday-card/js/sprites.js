@@ -157,11 +157,17 @@ export function drawItem(ctx, kind, x, y, scale = SPRITE_SCALE) {
 }
 export const ITEM_SIZE = 8 * SPRITE_SCALE;
 
+let skyGradient = null;
+let skyGradientH = 0;
+
 export function drawBackground(ctx, w, h, scrollX) {
-  const sky = ctx.createLinearGradient(0, 0, 0, h);
-  sky.addColorStop(0, '#ffd9a8');
-  sky.addColorStop(1, '#ffb3d1');
-  ctx.fillStyle = sky;
+  if (!skyGradient || skyGradientH !== h) {
+    skyGradient = ctx.createLinearGradient(0, 0, 0, h); // cache: don't rebuild every frame
+    skyGradient.addColorStop(0, '#ffd9a8');
+    skyGradient.addColorStop(1, '#ffb3d1');
+    skyGradientH = h;
+  }
+  ctx.fillStyle = skyGradient;
   ctx.fillRect(0, 0, w, h);
 
   ctx.fillStyle = '#caa6e8';

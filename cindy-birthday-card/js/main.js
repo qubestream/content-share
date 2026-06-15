@@ -1,7 +1,7 @@
-import { content } from '../content.js?v=mqeo6znv';
-import { initCarousel } from './carousel.js?v=mqeo6znv';
-import { createGame } from './game.js?v=mqeo6znv';
-import { start as startAudio, stopMusic, toggleMute } from './audio.js?v=mqeo6znv';
+import { content } from '../content.js?v=mqeogo0y';
+import { initCarousel } from './carousel.js?v=mqeogo0y';
+import { createGame } from './game.js?v=mqeogo0y';
+import { start as startAudio, stopMusic, toggleMute } from './audio.js?v=mqeogo0y';
 
 function paragraphs(el, text) {
   el.innerHTML = '';

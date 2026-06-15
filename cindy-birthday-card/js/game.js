@@ -1,7 +1,7 @@
-import { LEVEL } from './level.js?v=mqeo6znv';
-import { rectsOverlap, tryJump, stepRunner } from './physics.js?v=mqeo6znv';
-import { drawBackground, drawCindy, drawItem, CINDY_W, CINDY_H, ITEM_SIZE } from './sprites.js?v=mqeo6znv';
-import { blip, thud, win as winSound, boom as boomSound } from './audio.js?v=mqeo6znv';
+import { LEVEL } from './level.js?v=mqeogo0y';
+import { rectsOverlap, tryJump, stepRunner } from './physics.js?v=mqeogo0y';
+import { drawBackground, drawCindy, drawItem, CINDY_W, CINDY_H, ITEM_SIZE } from './sprites.js?v=mqeogo0y';
+import { blip, thud, win as winSound, boom as boomSound } from './audio.js?v=mqeogo0y';
 
 const VIEW_W = 800;
 const VIEW_H = 300;
@@ -19,10 +19,12 @@ const ROCK_TOP = VIEW_H - 28 - ITEM_SIZE; // screen-y of the top of a ground roc
 const STOMP_BOUNCE_V = -11;   // little hop after stomping a rock
 const STOMP_POINTS = 2;       // reward for stomping a rock
 const COLLECT_POINTS = 1;     // present / balloon
+const STEP_MS = 1000 / 60;    // fixed simulation step (game speed is frame-rate independent)
+const MAX_STEPS = 5;          // cap catch-up steps per frame (avoids spiral on slow devices)
 
 export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) {
   const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2); // cap backing store (cheaper on hi-DPR phones)
   canvas.width = VIEW_W * dpr;
   canvas.height = VIEW_H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -35,6 +37,8 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
   let runPhaseTimer = 0;
   let runPhase = 0;
   let raf = null;
+  let lastNow = null;          // timestamp of previous frame (for fixed-timestep)
+  let acc = 0;                 // accumulated real time not yet simulated
   let cindy = { y: GROUND_Y, vy: 0, onGround: true };
   let fling = null;            // {x, y, vx, vy, rot} while being thrown out
   let blast = null;            // {parts, age} rock-explosion particles
@@ -173,8 +177,18 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
     }
   }
 
-  function frame() {
-    update();
+  function frame(now) {
+    // Fixed-timestep loop: simulate by REAL elapsed time, render once. This keeps
+    // game speed identical at 30 / 60 / 120 fps (no more slow motion on phones).
+    // `now` is undefined when frames are driven manually (tests) -> advance one step.
+    if (now == null) now = (lastNow == null ? 0 : lastNow) + STEP_MS;
+    if (lastNow == null) lastNow = now;
+    let dt = now - lastNow;
+    lastNow = now;
+    if (dt > 100) dt = 100;            // clamp after a tab-away / hitch
+    acc += dt;
+    let steps = 0;
+    while (acc >= STEP_MS && steps < MAX_STEPS) { update(); acc -= STEP_MS; steps++; }
     render();
     if (phase !== 'won' && phase !== 'dead') raf = requestAnimationFrame(frame);
     else raf = null;
@@ -188,6 +202,8 @@ export function createGame(canvas, { onScore, onProgress, onWin, onLose } = {}) 
     runPhaseTimer = 0;
     fling = null;
     blast = null;
+    lastNow = null;            // re-sync the clock so the gap while stopped isn't simulated
+    acc = 0;
     cindy = { y: GROUND_Y, vy: 0, onGround: true };
     consumed.clear();
     onScore && onScore(0);

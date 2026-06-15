@@ -73,14 +73,14 @@ const CINDY_JUMP = [
 ];
 
 const PRESENT = [
-  '.RRRRRR.',
-  '.R.YY.R.',
-  'RRRRRRRR',
-  'R.R..R.R',
-  'R.R..R.R',
-  'RRRRRRRR',
-  'R.R..R.R',
-  'RRRRRRRR',
+  '..Y..Y..',
+  '...YY...',
+  'CCCCCCCC',
+  'CCCYYCCC',
+  'YYYYYYYY',
+  'CCCYYCCC',
+  'CCCYYCCC',
+  'CCCYYCCC',
 ];
 const BALLOON = [
   '..PPPP..',
@@ -93,12 +93,12 @@ const BALLOON = [
   '...P....',
 ];
 const CAN = [
-  '.gggggg.',
-  '.gWWWWg.',
-  '.gWWWWg.',
-  '.gWWWWg.',
-  '.gWWWWg.',
-  '.gggggg.',
+  '.gRRRRg.',
+  '.RRRRRR.',
+  '.RRWWRR.',
+  '.RRWWRR.',
+  '.RRRRRR.',
+  '.gRRRRg.',
   '........',
   '........',
 ];
@@ -125,7 +125,7 @@ const BANANA = [
 
 const ITEM_PALETTE = {
   '.': null, R: '#d6334a', Y: '#ffd23f', P: '#ff7eb6',
-  g: '#9aa0a6', W: '#e8eaed', B: '#5b4636',
+  g: '#9aa0a6', W: '#e8eaed', B: '#5b4636', C: '#3aa0ff',
 };
 
 function drawGrid(ctx, grid, palette, x, y, scale) {

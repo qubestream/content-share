@@ -21,6 +21,7 @@ initCarousel(document.getElementById('carousel-root'), 'photos');
 
 const canvas = document.getElementById('game-canvas');
 const overlay = document.getElementById('game-overlay');
+const gameoverOverlay = document.getElementById('gameover-overlay');
 const hudScore = document.getElementById('hud-score');
 const progressFill = document.getElementById('progress-fill');
 
@@ -28,6 +29,7 @@ const game = createGame(canvas, {
   onScore: (s) => { hudScore.textContent = `🎁 ${s}`; },
   onProgress: (p) => { progressFill.style.width = `${Math.round(p * 100)}%`; },
   onWin: (s) => revealPayoff(s),
+  onLose: () => { gameoverOverlay.hidden = false; },
 });
 game.boot();
 
@@ -35,6 +37,11 @@ document.getElementById('play-btn').addEventListener('click', () => {
   startAudio();
   overlay.hidden = true;
   game.start();
+});
+
+document.getElementById('retry-btn').addEventListener('click', () => {
+  gameoverOverlay.hidden = true;
+  game.reset();
 });
 
 addEventListener('keydown', (e) => {

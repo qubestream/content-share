@@ -1,4 +1,4 @@
-import { photos } from '../photos.js?v=mqeo4y7g';
+import { photos } from '../photos.js?v=mqeo6znv';
 
 // Mounts a carousel into `root` (an element). Returns nothing.
 export function initCarousel(root, photoDir = 'photos') {

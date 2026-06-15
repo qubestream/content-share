@@ -8,7 +8,7 @@ export const content = {
     "You are the rock this whole family is built on — the one who holds us all together " +
     "and makes it look effortless. You've loved your kids and grandkids with your whole heart, " +
     "and you've always taken such good care of me, too. Today, it's our turn to celebrate you.\n" +
-    "Happy Birthday, Love Glen",
+    "Love, Glen",
 
   // Revealed ONLY after the game is won (the surprise climax).
   finalHidden:
@@ -17,7 +17,7 @@ export const content = {
     "You're the heart and the rock of this family, and the best grandma those kids could ever ask for. " +
     "Today, let us take care of you.\n" +
     "Happy birthday, Cindy. We love you with everything. ❤️\n" +
-    "Happy Birthday, Love Glen",
+    "Love, Glen",
 
   // Short call-to-action shown above the game.
   gamePrompt: "Help Cindy run to her party — catch the presents, hop the trash!",

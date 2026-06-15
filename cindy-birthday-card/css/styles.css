@@ -124,6 +124,7 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
 }
 .payoff-card p { margin: 0 0 12px; }
 .payoff-card p:last-child { margin-bottom: 0; }
+.payoff-again { margin-top: 18px; }
 
 .page-footer { text-align: center; color: var(--green); padding: 24px; }
 

@@ -62,6 +62,14 @@ function revealPayoff(score) {
   const tag = document.createElement('p');
   tag.innerHTML = `<strong>Final score: 🎁 ${score}</strong>`;
   card.appendChild(tag);
+  const again = document.createElement('button');
+  again.className = 'play-btn payoff-again';
+  again.textContent = '▶ Play the game again';
+  again.addEventListener('click', () => {
+    game.reset();
+    document.querySelector('.game-section').scrollIntoView({ behavior: 'smooth' });
+  });
+  card.appendChild(again);
   payoff.hidden = false;
   payoff.scrollIntoView({ behavior: 'smooth' });
   requestAnimationFrame(runConfetti);

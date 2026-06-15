@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday, Cindy</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="banner">
+    <div class="banner-bulbs" aria-hidden="true"></div>
+    <h1 class="banner-title">HAPPY<br />BIRTHDAY</h1>
+    <p class="banner-name" id="banner-name">Cindy</p>
+    <div class="banner-bulbs" aria-hidden="true"></div>
+  </header>
+
+  <main>
+    <section class="heartfelt" id="heartfelt"></section>
+
+    <section class="photos-section">
+      <h2 class="section-title">Memories</h2>
+      <div id="carousel-root"></div>
+    </section>
+
+    <section class="game-section">
+      <h2 class="section-title">Cindy's Birthday Runner</h2>
+      <p class="game-prompt" id="game-prompt"></p>
+      <div class="game-wrap">
+        <canvas id="game-canvas" width="800" height="300" aria-label="Birthday runner game"></canvas>
+        <div class="game-overlay" id="game-overlay">
+          <button class="play-btn" id="play-btn">▶ Tap to Play</button>
+        </div>
+        <div class="game-hud">
+          <span id="hud-score">🎁 0</span>
+          <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+          <button class="mute-btn" id="mute-btn" aria-label="Mute">🔊</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="payoff" id="payoff" hidden>
+      <canvas class="confetti" id="confetti-canvas" aria-hidden="true"></canvas>
+      <div class="payoff-card" id="payoff-card"></div>
+    </section>
+  </main>
+
+  <footer class="page-footer">Made with love 💛</footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
